@@ -1,64 +1,238 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-
-	<meta charset="utf-8" />
-	<title>Akinator</title>
-	<link href='http://fonts.googleapis.com/css?family=Josefin+Sans' rel='stylesheet' type='text/css'>
-	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
-	<link rel="stylesheet" type="text/css" href="css/defecto.css" />
-	<link rel="stylesheet" type="text/css" href="css/hint.min.css">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¿Quién es Quién? | Fútbol & League of Legends (Prolog 1v1)</title>
+    
+    <!-- Google Fonts: Outfit & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Hojas de estilo del juego -->
+    <link rel="stylesheet" href="css/game.css">
 </head>
 <body>
-	<div class="container" id="contenido_sistema">
-		<div class="row">
-			<div class="col-md-3"></div>
-			<div class="col-md-6">
-				<div id="imagen">
-					<img src="images/banner.png">
-				</div>
-				<div style="display:none;" class="contenedor_pregunta">
-					<div id="caja_pregunta">
-						<div id="pregunta"></div>
-					</div>
 
-					<div id="botones">
-						<button class="btn respuesta btn-success" rel="si" type="button">Si</button>
-						<button class="btn respuesta btn-danger pull-right" rel="no" type="button">No</button>
-					</div>
-				</div>
-				<div class="final" style="display: none;">
-					<div class="alert alert-success">
-						Pensaste en: <strong class="resultado"></strong>
-					</div>
-				</div>
-				<div class="no_encontrado" style="display: none;">
-					<div class="alert alert-danger">
-						Lo sentimos, nuestra base de conocimiento no ha podido dar con quien piensas :(.
-					</div>
-				</div>
-				<div class="inicio">
-					<button class="btn btn-primary" id="iniciar_partida" type="button">Iniciar partida</button>
-				</div>
-			</div>
-			<div class="col-md-3"></div>
-		</div>
-	</div>
-	
-	<input type="hidden" id="pregunta_actual" value="" />
-	<input type="hidden" id="persona_actual" value="" />
-	<footer class="footer">
-		<div class="container">
-		<p class="text-muted">Creado por: <a href="#">Carlos Batista [ 2012-1517 ]</a> | <a href="#">C&eacute;sar M&eacute;ndez[ 2013-0262 ]</a></p>
-		</div>
-	</footer>
+    <!-- NAVBAR SUPERIOR -->
+    <header class="game-navbar">
+        <div class="brand">
+            <span class="brand-icon">⚔️</span>
+            <div>
+                <h1 class="brand-title">¿QUIÉN ES QUIÉN?</h1>
+                <div style="font-size: 11px; color: var(--text-muted); font-weight: 500;">Duelo 1v1 vs IA &bull; Fútbol & LoL</div>
+            </div>
+        </div>
+        <div class="nav-actions">
+            <span id="engine-status-badge" class="engine-badge local">⚡ Verificando motor...</span>
+            <button id="mute-btn" class="icon-btn" title="Activar/Silenciar sonido" aria-label="Silenciar">🔊</button>
+        </div>
+    </header>
 
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/typed.js"></script>
-	<script type="text/javascript" src="js/ejs.js"></script>
-	<script type="text/javascript" src="js/bootstrap.min.js"></script>
-	<script type="text/javascript" src="js/dictionary.js"></script>
-	<script type="text/javascript" src="js/general.js"></script>
+    <!-- CONTENEDOR PRINCIPAL DE PANTALLAS -->
+    <main class="app-container">
+
+        <!-- PANTALLA 1: MENÚ Y CONFIGURACIÓN -->
+        <section id="screen-menu" class="screen active">
+            <div class="menu-card">
+                <div style="font-size: 48px; margin-bottom: 8px;">🎮</div>
+                <h2 class="menu-title">DUELO DE DEDUCCIÓN</h2>
+                <p class="menu-subtitle">Elige tu personaje en secreto y deduce el de la IA antes de que descubra el tuyo.</p>
+
+                <!-- Selección de Categoría / Modo -->
+                <div class="config-group">
+                    <span class="config-label">1. Elige el Modo de Juego</span>
+                    <div class="pill-selector">
+                        <div class="pill-option selected" data-config="modo" data-value="futbol">
+                            <span class="pill-icon">⚽</span>
+                            <div class="pill-text">
+                                <strong>Modo Fútbol</strong>
+                                <small>Estrellas mundiales</small>
+                            </div>
+                        </div>
+                        <div class="pill-option" data-config="modo" data-value="lol">
+                            <span class="pill-icon">🗡️</span>
+                            <div class="pill-text">
+                                <strong>Modo LoL</strong>
+                                <small>Campeones de Runaterra</small>
+                            </div>
+                        </div>
+                        <div class="pill-option" data-config="modo" data-value="mixto">
+                            <span class="pill-icon">🔥</span>
+                            <div class="pill-text">
+                                <strong>Modo Mixto</strong>
+                                <small>Fútbol y LoL combinados</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selección de Dificultad -->
+                <div class="config-group">
+                    <span class="config-label">2. Dificultad de la IA</span>
+                    <div class="pill-selector">
+                        <div class="pill-option selected" data-config="dificultad" data-value="dificil">
+                            <span class="pill-icon">🧠</span>
+                            <div class="pill-text">
+                                <strong>Difícil (Estrategia 50/50)</strong>
+                                <small>Partición óptima de candidatos</small>
+                            </div>
+                        </div>
+                        <div class="pill-option" data-config="dificultad" data-value="facil">
+                            <span class="pill-icon">🎲</span>
+                            <div class="pill-text">
+                                <strong>Fácil (Casual)</strong>
+                                <small>Preguntas aleatorias</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="start-match-btn" class="btn-primary-gaming" type="button">Comenzar Duelo</button>
+            </div>
+        </section>
+
+        <!-- PANTALLA 2: ELEGIR PERSONAJE SECRETO -->
+        <section id="screen-pick-secret" class="screen">
+            <div class="menu-card" style="max-width: 900px;">
+                <h2 class="menu-title">ELIGE TU PERSONAJE SECRETO</h2>
+                <p class="menu-subtitle">Haz clic en el personaje que serás durante esta partida. La IA intentará adivinarlo.</p>
+                
+                <div id="secret-pick-grid" class="guess-grid" style="max-height: 60vh;">
+                    <!-- Se inyectan las cartas del tablero -->
+                </div>
+            </div>
+        </section>
+
+        <!-- PANTALLA 3: SORTEO DE MONEDA AL AIRE -->
+        <section id="screen-coin-toss" class="screen">
+            <div class="toss-card">
+                <h2 style="font-family: var(--font-heading); font-size: 24px; font-weight: 800; margin-bottom: 8px;">SORTEO DE PRIMER TURNO</h2>
+                <p style="color: var(--text-muted); font-size: 14px;">Lanzando moneda al aire para decidir quién comienza...</p>
+
+                <div class="coin-container">
+                    <div id="coin-element" class="coin">🪙</div>
+                </div>
+
+                <div id="toss-status" style="font-size: 16px; min-height: 48px; display: flex; align-items: center; justify-content: center;">
+                    Girando...
+                </div>
+            </div>
+        </section>
+
+        <!-- PANTALLA 4: TABLERO DE JUEGO (GAMEPLAY) -->
+        <section id="screen-gameplay" class="screen">
+            
+            <!-- Dashboard de Turno y Estado -->
+            <div class="game-header">
+                <div class="turn-indicator">
+                    <div id="turn-pulse" class="turn-pulse"></div>
+                    <div>
+                        <div class="turn-text-label">TURNO ACTUAL</div>
+                        <div id="turn-text-player" class="turn-text-player">Tu Turno</div>
+                    </div>
+                </div>
+
+                <!-- Tarjeta del personaje secreto del jugador -->
+                <div class="user-secret-badge">
+                    <img id="user-secret-thumb" class="user-secret-thumb" src="" alt="Secreto">
+                    <div>
+                        <div style="font-size: 10px; text-transform: uppercase; color: var(--accent-cyan); font-weight: 700;">Tu Personaje Secreto</div>
+                        <strong id="user-secret-name" style="font-size: 14px;">-</strong>
+                    </div>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="game-controls">
+                    <button id="btn-ask" class="btn-action" type="button">
+                        <span>❓</span> Hacer Pregunta
+                    </button>
+                    <button id="btn-guess" class="btn-action btn-guess" type="button">
+                        <span>🎯</span> ¡Adivinar Personaje!
+                    </button>
+                </div>
+            </div>
+
+            <!-- Barra de Diálogo y Respuestas -->
+            <div class="dialogue-bar">
+                <div class="dialogue-avatar">🤖</div>
+                <div class="dialogue-content">
+                    <div id="dialogue-speaker" class="dialogue-speaker">Comienza el juego</div>
+                    <div id="dialogue-text" class="dialogue-text">Selecciona tu acción para comenzar a descartar personajes.</div>
+                </div>
+            </div>
+
+            <!-- Cuadrícula del Tablero de Cartas 3D -->
+            <div id="board-grid" class="board-grid">
+                <!-- Se inyectan las 20 cartas volteables dinámicamente -->
+            </div>
+        </section>
+
+        <!-- PANTALLA 5: FIN DE PARTIDA -->
+        <section id="screen-game-over" class="screen">
+            <div class="result-card">
+                <div id="result-icon" class="result-icon">🏆</div>
+                <h2 id="result-title" class="result-title">¡VICTORIA!</h2>
+                <p id="result-desc" class="result-desc">Has descubierto el personaje de la IA.</p>
+
+                <!-- Revelación del Secreto de la IA -->
+                <div class="result-secret-showcase">
+                    <img id="result-secret-img" class="result-secret-img" src="" alt="Secreto IA">
+                    <div>
+                        <div style="font-size: 11px; text-transform: uppercase; color: var(--accent-gold); font-weight: 700;">Personaje Secreto de la IA</div>
+                        <div id="result-secret-name" style="font-size: 18px; font-weight: 800;">-</div>
+                        <div id="result-secret-sub" style="font-size: 13px; color: var(--text-muted);">-</div>
+                    </div>
+                </div>
+
+                <button id="play-again-btn" class="btn-primary-gaming" type="button">Jugar Otra Partida</button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL: SELECCIONAR PREGUNTA -->
+    <div id="modal-questions" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 class="modal-title">¿Qué deseas preguntar a la IA?</h3>
+                <button id="close-questions-modal" class="close-btn" aria-label="Cerrar">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Pestañas de Filtro por Categoría -->
+                <div id="filter-tabs" class="filter-tabs">
+                    <!-- Se inyectan las categorías de preguntas -->
+                </div>
+                <!-- Lista de Preguntas Disponibles -->
+                <div id="questions-list" class="questions-list">
+                    <!-- Se inyectan las preguntas -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: ADIVINAR PERSONAJE -->
+    <div id="modal-guess" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 class="modal-title" style="color: var(--accent-red);">🎯 ¿Quién crees que es el personaje secreto de la IA?</h3>
+                <button id="close-guess-modal" class="close-btn" aria-label="Cerrar">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+                    ⚠️ Atención: Si te equivocas, perderás tu turno y la IA tendrá la oportunidad de ganar.
+                </p>
+                <div id="guess-grid" class="guess-grid">
+                    <!-- Se inyectan los candidatos para adivinar -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="js/audio.js"></script>
+    <script src="js/game_engine.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>
